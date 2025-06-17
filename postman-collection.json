@@ -1,0 +1,1564 @@
+{
+  "info": {
+    "name": "Chat Microservice - Mongoose Edition",
+    "description": "Complete API testing collection for chat microservice with Mongoose and MongoDB",
+    "version": "2.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "mongoose-chat-service"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL for the chat service"
+    },
+    {
+      "key": "auth_token",
+      "value": "test-token-123",
+      "type": "string",
+      "description": "Auth token for user123"
+    },
+    {
+      "key": "auth_token_user456",
+      "value": "mock-token-user456",
+      "type": "string",
+      "description": "Auth token for user456"
+    },
+    {
+      "key": "auth_token_user789",
+      "value": "mock-token-user789",
+      "type": "string",
+      "description": "Auth token for user789"
+    },
+    {
+      "key": "auth_token_admin",
+      "value": "mock-token-admin_001",
+      "type": "string",
+      "description": "Auth token for admin_001"
+    },
+    {
+      "key": "user_id",
+      "value": "user123",
+      "type": "string"
+    },
+    {
+      "key": "recipient_id",
+      "value": "user456",
+      "type": "string"
+    },
+    {
+      "key": "third_user_id",
+      "value": "user789",
+      "type": "string"
+    },
+    {
+      "key": "admin_user_id",
+      "value": "admin_001",
+      "type": "string"
+    },
+    {
+      "key": "chat_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId - set automatically from responses"
+    },
+    {
+      "key": "direct_chat_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId - set automatically from responses"
+    },
+    {
+      "key": "group_chat_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId - set automatically from responses"
+    },
+    {
+      "key": "message_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId - set automatically from responses"
+    },
+    {
+      "key": "attachment_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId - set automatically from responses"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Service is healthy', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.equal('ok');",
+                  "    pm.expect(response).to.have.property('timestamp');",
+                  "    pm.expect(response).to.have.property('database');",
+                  "});",
+                  "",
+                  "pm.test('Database is connected', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.database).to.equal('connected');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check service health and database connectivity"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Authentication Tests",
+      "item": [
+        {
+          "name": "Valid Token - user123",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Valid token allows access', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('chats');",
+                  "    pm.expect(response.chats).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Save first chat ID for later tests",
+                  "const response = pm.response.json();",
+                  "if (response.chats && response.chats.length > 0) {",
+                  "    const groupChat = response.chats.find(chat => chat.isGroup);",
+                  "    const directChat = response.chats.find(chat => !chat.isGroup);",
+                  "    ",
+                  "    if (groupChat) {",
+                  "        pm.collectionVariables.set('group_chat_id', groupChat._id);",
+                  "        console.log('Found group chat:', groupChat._id);",
+                  "    }",
+                    "    if (directChat) {",
+                    "        pm.collectionVariables.set('direct_chat_id', directChat._id);",
+                    "        console.log('Found direct chat:', directChat._id);",
+                    "    }",
+                    "}"
+                  ]
+                  }
+                }
+                ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats"]
+            },
+            "description": "Test valid authentication with user123 token"
+          }
+        },
+        {
+          "name": "Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid token is rejected', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('error');",
+                  "    pm.expect(response.error).to.equal('Unauthorized');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid-token-xyz",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats"]
+            },
+            "description": "Test that invalid tokens are properly rejected"
+          }
+        },
+        {
+          "name": "No Auth Header",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Missing auth header is rejected', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats"]
+            },
+            "description": "Test that requests without auth are rejected"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Chat Management",
+      "item": [
+        {
+          "name": "Get All User Chats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Chats retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('chats');",
+                  "    pm.expect(response.chats).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Chat objects have required fields', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.chats && response.chats.length > 0) {",
+                  "        const chat = response.chats[0];",
+                  "        pm.expect(chat).to.have.property('_id');",
+                  "        pm.expect(chat).to.have.property('isGroup');",
+                  "        pm.expect(chat).to.have.property('participants');",
+                  "        pm.expect(chat).to.have.property('createdAt');",
+                  "        pm.expect(chat.participants).to.be.an('array');",
+                  "    }",
+                  "});",
+                  "",
+                  "// Store chat IDs for later use",
+                  "const response = pm.response.json();",
+                  "if (response.chats && response.chats.length > 0) {",
+                  "    const groupChat = response.chats.find(c => c.isGroup);",
+                  "    const directChat = response.chats.find(c => !c.isGroup);",
+                  "    ",
+                  "    if (groupChat) {",
+                  "        pm.collectionVariables.set('group_chat_id', groupChat._id);",
+                  "    }",
+                  "    if (directChat) {",
+                  "        pm.collectionVariables.set('direct_chat_id', directChat._id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats"]
+            },
+            "description": "Retrieve all chats for the authenticated user"
+          }
+        },
+        {
+          "name": "Create Direct Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('direct_chat_id', response.chat._id);",
+                  "    ",
+                  "    pm.test('Direct chat created or retrieved successfully', function () {",
+                  "        pm.expect(response.chat).to.have.property('_id');",
+                  "        pm.expect(response.chat.isGroup).to.be.false;",
+                  "        pm.expect(response.chat.name).to.be.null;",
+                  "    });",
+                  "    ",
+                  "    pm.test('Chat ID is valid ObjectId', function () {",
+                  "        const objectIdRegex = /^[0-9a-fA-F]{24}$/;",
+                  "        pm.expect(response.chat._id).to.match(objectIdRegex);",
+                  "    });",
+                  "    ",
+                  "    console.log('Direct chat ID:', response.chat._id);",
+                  "} else {",
+                  "    pm.test('Request failed with error', function () {",
+                  "        pm.response.to.have.status.oneOf([400, 404, 500]);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientId\": \"{{recipient_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chats/direct",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "direct"]
+            },
+            "description": "Create a direct chat between current user and recipient"
+          }
+        },
+        {
+          "name": "Create Group Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('group_chat_id', response.chat._id);",
+                  "    pm.collectionVariables.set('chat_id', response.chat._id); // Fallback",
+                  "    ",
+                  "    pm.test('Group chat created successfully', function () {",
+                  "        pm.expect(response.chat).to.have.property('_id');",
+                  "        pm.expect(response.chat.isGroup).to.be.true;",
+                  "        pm.expect(response.chat.name).to.equal('Postman Test Group');",
+                  "    });",
+                  "    ",
+                  "    pm.test('Group chat has metadata', function () {",
+                  "        pm.expect(response.chat).to.have.property('metadata');",
+                  "        if (response.chat.metadata) {",
+                  "            pm.expect(response.chat.metadata).to.have.property('created_by');",
+                  "        }",
+                  "    });",
+                  "    ",
+                  "    console.log('Group chat ID:', response.chat._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Group\",\n  \"participantIds\": [\"{{recipient_id}}\", \"{{third_user_id}}\"],\n  \"metadata\": {\n    \"created_by\": \"{{user_id}}\",\n    \"description\": \"A test group created via Postman API\",\n    \"tags\": [\"testing\", \"postman\", \"api\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chats/group",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "group"]
+            },
+            "description": "Create a group chat with multiple participants"
+          }
+        },
+        {
+          "name": "Add User to Group Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User added to group successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{admin_user_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{group_chat_id}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{group_chat_id}}", "users"]
+            },
+            "description": "Add a new user to an existing group chat (admin required)"
+          }
+        },
+        {
+          "name": "Update Chat Metadata",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Chat metadata updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.chat).to.have.property('metadata');",
+                  "    pm.expect(response.chat.metadata.theme).to.equal('dark');",
+                  "    pm.expect(response.chat.metadata.lastUpdated).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metadata\": {\n    \"theme\": \"dark\",\n    \"description\": \"Updated via Postman API\",\n    \"tags\": [\"updated\", \"postman\", \"mongoose\"],\n    \"lastUpdated\": \"{{$timestamp}}\",\n    \"updatedBy\": \"{{user_id}}\",\n    \"settings\": {\n      \"notifications\": true,\n      \"allowFileSharing\": true,\n      \"maxMembers\": 50\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{group_chat_id}}/metadata",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{group_chat_id}}", "metadata"]
+            },
+            "description": "Update chat metadata with custom information"
+          }
+        },
+        {
+          "name": "Remove User from Group Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User removed from group successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats/{{group_chat_id}}/users/{{admin_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats", "{{group_chat_id}}", "users", "{{admin_user_id}}"]
+            },
+            "description": "Remove a user from group chat (admin required)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📨 Messaging",
+      "item": [
+        {
+          "name": "Send Message to Direct Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('message_id', response.message._id);",
+                  "    ",
+                  "    pm.test('Message sent successfully', function () {",
+                  "        pm.expect(response.message).to.have.property('_id');",
+                  "        pm.expect(response.message.content).to.include('Hello from Postman');",
+                  "        pm.expect(response.message.senderId).to.equal(pm.collectionVariables.get('user_id'));",
+                  "        pm.expect(response.message.chatId).to.exist;",
+                  "    });",
+                  "    ",
+                  "    pm.test('Message has timestamp', function () {",
+                  "        pm.expect(response.message).to.have.property('createdAt');",
+                  "        pm.expect(response.message).to.have.property('updatedAt');",
+                  "    });",
+                  "    ",
+                  "    pm.test('Message has cached sender info', function () {",
+                  "        if (response.message.senderEmail) {",
+                  "            pm.expect(response.message.senderEmail).to.include('@');",
+                  "        }",
+                  "    });",
+                  "    ",
+                  "    console.log('Message ID:', response.message._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{direct_chat_id}}\",\n  \"content\": \"Hello from Postman! 🚀 Testing Mongoose implementation\",\n  \"metadata\": {\n    \"messageType\": \"text\",\n    \"priority\": \"normal\",\n    \"source\": \"postman-api-test\",\n    \"timestamp\": \"{{$timestamp}}\",\n    \"testData\": true,\n    \"platform\": \"web\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Send a text message to a direct chat"
+          }
+        },
+        {
+          "name": "Send Rich Message to Group Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    ",
+                  "    pm.test('Rich message sent successfully', function () {",
+                  "        pm.expect(response.message).to.have.property('_id');",
+                  "        pm.expect(response.message.content).to.include('📢');",
+                  "        pm.expect(response.message.metadata.messageType).to.equal('announcement');",
+                  "    });",
+                  "    ",
+                  "    pm.test('Message has rich metadata', function () {",
+                  "        pm.expect(response.message.metadata).to.have.property('mentions');",
+                  "        pm.expect(response.message.metadata).to.have.property('formatting');",
+                  "        pm.expect(response.message.metadata.priority).to.equal('high');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{group_chat_id}}\",\n  \"content\": \"📢 **Important Announcement!** \\n\\nThe Mongoose implementation is working perfectly! 🎉\\n\\n@{{recipient_id}} @{{third_user_id}} please check this out.\",\n  \"metadata\": {\n    \"messageType\": \"announcement\",\n    \"priority\": \"high\",\n    \"mentions\": [\"{{recipient_id}}\", \"{{third_user_id}}\"],\n    \"formatting\": {\n      \"bold\": [\"Important Announcement!\"],\n      \"emojis\": [\"📢\", \"🎉\"]\n    },\n    \"source\": \"postman-group-test\",\n    \"timestamp\": \"{{$timestamp}}\",\n    \"isPublic\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Send a rich formatted message to group chat with mentions"
+          }
+        },
+        {
+          "name": "Get Direct Chat Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Messages retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('messages');",
+                  "    pm.expect(response.messages).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Messages have correct structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.messages && response.messages.length > 0) {",
+                  "        const message = response.messages[0];",
+                  "        pm.expect(message).to.have.property('_id');",
+                  "        pm.expect(message).to.have.property('chatId');",
+                  "        pm.expect(message).to.have.property('senderId');",
+                  "        pm.expect(message).to.have.property('content');",
+                  "        pm.expect(message).to.have.property('createdAt');",
+                  "        ",
+                  "        // Check if sender info is populated",
+                  "        if (message.sender) {",
+                  "            pm.expect(message.sender).to.have.property('id');",
+                  "        }",
+                  "        ",
+                  "        // Save latest message ID for further tests",
+                  "        pm.collectionVariables.set('message_id', message._id);",
+                  "    }",
+                  "});",
+                  "",
+                  "pm.test('Messages are sorted by creation date', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.messages && response.messages.length > 1) {",
+                  "        const first = new Date(response.messages[0].createdAt);",
+                  "        const second = new Date(response.messages[1].createdAt);",
+                  "        pm.expect(first.getTime()).to.be.greaterThanOrEqual(second.getTime());",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/messages?chatId={{direct_chat_id}}&page=1&pageSize=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"],
+              "query": [
+                {
+                  "key": "chatId",
+                  "value": "{{direct_chat_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Retrieve messages from direct chat with pagination"
+          }
+        },
+        {
+          "name": "Get Group Chat Messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Group messages retrieved successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('messages');",
+                  "    pm.expect(response.messages).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/messages?chatId={{group_chat_id}}&page=1&pageSize=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"],
+              "query": [
+                {
+                  "key": "chatId",
+                  "value": "{{group_chat_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Retrieve messages from group chat"
+          }
+        },
+        {
+          "name": "Mark Message as Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Message marked as read successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"messageId\": \"{{message_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages/{{message_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages", "{{message_id}}", "read"]
+            },
+            "description": "Mark a specific message as read by current user"
+          }
+        },
+        {
+          "name": "Add Attachments to Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Attachments added successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('attachments');",
+                  "    pm.expect(response.attachments).to.be.an('array');",
+                  "    pm.expect(response.attachments.length).to.equal(3);",
+                  "});",
+                  "",
+                  "pm.test('Attachments have correct structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    const attachment = response.attachments[0];",
+                  "    pm.expect(attachment).to.have.property('_id');",
+                  "    pm.expect(attachment).to.have.property('messageId');",
+                  "    pm.expect(attachment).to.have.property('name');",
+                  "    pm.expect(attachment).to.have.property('url');",
+                  "    pm.expect(attachment).to.have.property('type');",
+                  "    pm.expect(attachment).to.have.property('size');",
+                  "    ",
+                  "    // Save attachment ID for later use",
+                  "    pm.collectionVariables.set('attachment_id', attachment._id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"messageId\": \"{{message_id}}\",\n  \"attachments\": [\n    {\n      \"name\": \"mongoose-implementation-doc.pdf\",\n      \"url\": \"https://example.com/files/mongoose-implementation-doc.pdf\",\n      \"type\": \"application/pdf\",\n      \"size\": 2048576\n    },\n    {\n      \"name\": \"postman-test-screenshot.png\",\n      \"url\": \"https://example.com/images/postman-test-screenshot.png\",\n      \"type\": \"image/png\",\n      \"size\": 1024768\n    },\n    {\n      \"name\": \"api-test-results.json\",\n      \"url\": \"https://example.com/data/api-test-results.json\",\n      \"type\": \"application/json\",\n      \"size\": 51200\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages/{{message_id}}/attachments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages", "{{message_id}}", "attachments"]
+            },
+            "description": "Add multiple file attachments to an existing message"
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Multi-User Testing",
+      "item": [
+        {
+          "name": "User456 - Get Chats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User456 can access their chats', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('chats');",
+                  "    pm.expect(response.chats).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('User456 sees shared chats with user123', function () {",
+                  "    const response = pm.response.json();",
+                  "    const directChatId = pm.collectionVariables.get('direct_chat_id');",
+                  "    const groupChatId = pm.collectionVariables.get('group_chat_id');",
+                  "    ",
+                  "    if (directChatId) {",
+                  "        const hasDirectChat = response.chats.some(chat => chat._id === directChatId);",
+                  "        pm.expect(hasDirectChat, 'Should have access to direct chat').to.be.true;",
+                  "    }",
+                  "    ",
+                  "    if (groupChatId) {",
+                  "        const hasGroupChat = response.chats.some(chat => chat._id === groupChatId);",
+                  "        pm.expect(hasGroupChat, 'Should have access to group chat').to.be.true;",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token_user456}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "chats"]
+            },
+            "description": "Test chat access as user456"
+          }
+        },
+        {
+          "name": "User456 - Send Reply Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User456 can send messages', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message.senderId).to.equal('user456');",
+                  "    pm.expect(response.message.content).to.include('Reply from user456');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token_user456}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{direct_chat_id}}\",\n  \"content\": \"Reply from user456! 👋 The Mongoose implementation looks great!\",\n  \"metadata\": {\n    \"messageType\": \"reply\",\n    \"replyingTo\": \"user123\",\n    \"sentiment\": \"positive\",\n    \"source\": \"user456-test\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Send a reply message as user456"
+          }
+        },
+        {
+          "name": "User789 - Send Group Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User789 can send group messages', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message.senderId).to.equal('user789');",
+                  "    pm.expect(response.message.chatId).to.equal(pm.collectionVariables.get('group_chat_id'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token_user789}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{group_chat_id}}\",\n  \"content\": \"Hello everyone! 🎊 User789 joining the Mongoose party! The API tests are working perfectly.\",\n  \"metadata\": {\n    \"messageType\": \"greeting\",\n    \"enthusiasm\": \"high\",\n    \"source\": \"user789-test\",\n    \"emojis\": [\"🎊\"],\n    \"tags\": [\"greeting\", \"mongoose\", \"testing\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Send a group message as user789"
+          }
+        },
+        {
+          "name": "Unauthorized Access Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Unauthorized user cannot access private chat', function () {",
+                  "    // This test assumes admin_001 is not part of the direct chat",
+                  "    // The response could be 401 (unauthorized) or 403 (forbidden)",
+                  "    pm.response.to.have.status.oneOf([401, 403, 404]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token_admin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{direct_chat_id}}\",\n  \"content\": \"This should fail - admin_001 is not in this direct chat\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Test that unauthorized users cannot send to chats they're not part of"
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Management",
+      "item": [
+        {
+          "name": "Get Users with Chat History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Users with chat history retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('users');",
+                  "    pm.expect(response.users).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Users have expected structure', function () {",
+                  "    const response = pm.response.json();",
+                  "    if (response.users && response.users.length > 0) {",
+                  "        const user = response.users[0];",
+                  "        pm.expect(user).to.have.property('id');",
+                  "        // Note: Since we're using auth adapter, we might not have all user fields",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/chats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "chats"]
+            },
+            "description": "Get all users that current user has chatted with"
+          }
+        },
+        {
+          "name": "Set User Online",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User status set to online', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/online",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "online"]
+            },
+            "description": "Set current user status to online"
+          }
+        },
+        {
+          "name": "Set User Offline",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User status set to offline', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/users/offline",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "offline"]
+            },
+            "description": "Set current user status to offline"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Advanced Queries",
+      "item": [
+        {
+          "name": "Paginated Messages - Page 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('First page of messages retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.messages).to.be.an('array');",
+                  "    pm.expect(response.messages.length).to.be.at.most(5);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/messages?chatId={{group_chat_id}}&page=1&pageSize=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"],
+              "query": [
+                {
+                  "key": "chatId",
+                  "value": "{{group_chat_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Test message pagination - first page"
+          }
+        },
+        {
+          "name": "Paginated Messages - Page 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Second page of messages retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.messages).to.be.an('array');",
+                  "    // Second page might have fewer messages",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/messages?chatId={{group_chat_id}}&page=2&pageSize=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"],
+              "query": [
+                {
+                  "key": "chatId",
+                  "value": "{{group_chat_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Test message pagination - second page"
+          }
+        },
+        {
+          "name": "Large Page Size Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Large page size handled correctly', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.messages).to.be.an('array');",
+                  "    // Should return all available messages up to the limit",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/messages?chatId={{group_chat_id}}&page=1&pageSize=100",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"],
+              "query": [
+                {
+                  "key": "chatId",
+                  "value": "{{group_chat_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Test with large page size to get many messages"
+          }
+        }
+      ]
+    },
+    {
+      "name": "❌ Error Scenarios",
+      "item": [
+        {
+          "name": "Invalid ObjectId Format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid ObjectId returns 400 or 404', function () {",
+                  "    pm.response.to.have.status.oneOf([400, 404]);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('error');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/messages?chatId=invalid-object-id-format&page=1&pageSize=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"],
+              "query": [
+                {
+                  "key": "chatId",
+                  "value": "invalid-object-id-format"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Test error handling for invalid ObjectId format"
+          }
+        },
+        {
+          "name": "Non-existent Chat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Non-existent chat returns 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('not found');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"507f1f77bcf86cd799439999\",\n  \"content\": \"This should fail - chat does not exist\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Test sending message to non-existent chat"
+          }
+        },
+        {
+          "name": "Missing Required Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Missing required fields returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.equal('Validation failed');",
+                  "    pm.expect(response).to.have.property('details');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{direct_chat_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Test validation error for missing message content"
+          }
+        },
+        {
+          "name": "Empty Message Content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Empty content returns validation error', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.equal('Validation failed');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{direct_chat_id}}\",\n  \"content\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Test validation for empty message content"
+          }
+        },
+        {
+          "name": "Invalid JSON Format",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid JSON returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{direct_chat_id}}\",\n  \"content\": \"Test message\",\n  \"invalidField\": \"incomplete_json\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Test error handling for malformed JSON"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 Performance Tests",
+      "item": [
+        {
+          "name": "Bulk Message Creation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// This test will send multiple messages rapidly to test performance",
+                  "pm.globals.set('bulk_test_count', 0);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Bulk message handled efficiently', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const responseTime = pm.response.responseTime;",
+                  "    pm.expect(responseTime).to.be.below(1000); // Should respond within 1 second",
+                  "});",
+                  "",
+                  "// Track bulk test progress",
+                  "let count = parseInt(pm.globals.get('bulk_test_count') || '0');",
+                  "count++;",
+                  "pm.globals.set('bulk_test_count', count.toString());",
+                  "console.log(`Bulk test message ${count} completed in ${pm.response.responseTime}ms`);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{group_chat_id}}\",\n  \"content\": \"Performance test message #{{$randomInt}} - Testing Mongoose efficiency! ⚡\",\n  \"metadata\": {\n    \"messageType\": \"performance_test\",\n    \"testId\": \"{{$guid}}\",\n    \"timestamp\": \"{{$timestamp}}\",\n    \"randomData\": {\n      \"number\": \"{{$randomInt}}\",\n      \"word\": \"{{$randomWord}}\",\n      \"uuid\": \"{{$guid}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Send message with random data to test performance"
+          }
+        },
+        {
+          "name": "Large Message Content",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Large message handled correctly', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message.content.length).to.be.greaterThan(1000);",
+                  "});",
+                  "",
+                  "pm.test('Large message response time acceptable', function () {",
+                  "    const responseTime = pm.response.responseTime;",
+                  "    pm.expect(responseTime).to.be.below(2000); // Should respond within 2 seconds",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chatId\": \"{{group_chat_id}}\",\n  \"content\": \"🚀 This is a large message content test for the Mongoose implementation! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. 📚✨\",\n  \"metadata\": {\n    \"messageType\": \"large_content_test\",\n    \"contentLength\": 1337,\n    \"testPurpose\": \"Performance testing with large message content\",\n    \"features\": [\"mongoose\", \"large-content\", \"performance\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "messages"]
+            },
+            "description": "Test sending message with large content"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// Global pre-request script",
+          "console.log(`🔄 ${pm.info.requestName} - ${new Date().toISOString()}`);",
+          "",
+          "// Ensure we have required variables",
+          "if (!pm.collectionVariables.get('base_url')) {",
+          "    pm.collectionVariables.set('base_url', 'http://localhost:3000');",
+          "}",
+          "",
+          "// Log current auth token being used",
+          "const currentToken = pm.request.auth?.bearer?.[0]?.value || pm.collectionVariables.get('auth_token');",
+          "if (currentToken && currentToken.includes('user')) {",
+          "    console.log(`🔐 Using auth token: ${currentToken.substring(0, 20)}...`);",
+          "}"
+        ]
+      }
+    }
+  ]
+}

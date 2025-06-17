@@ -1,0 +1,107 @@
+{
+  "id": "mongoose-chat-environment",
+  "name": "Chat Microservice - Mongoose Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "default",
+      "enabled": true,
+      "description": "Base URL for the chat microservice"
+    },
+    {
+      "key": "auth_token",
+      "value": "test-token-123",
+      "type": "secret",
+      "enabled": true,
+      "description": "Primary auth token for user123"
+    },
+    {
+      "key": "auth_token_user456",
+      "value": "mock-token-user456",
+      "type": "secret",
+      "enabled": true,
+      "description": "Auth token for user456"
+    },
+    {
+      "key": "auth_token_user789",
+      "value": "mock-token-user789",
+      "type": "secret",
+      "enabled": true,
+      "description": "Auth token for user789"
+    },
+    {
+      "key": "auth_token_admin",
+      "value": "mock-token-admin_001",
+      "type": "secret",
+      "enabled": true,
+      "description": "Auth token for admin_001"
+    },
+    {
+      "key": "user_id",
+      "value": "user123",
+      "type": "default",
+      "enabled": true,
+      "description": "Primary test user ID"
+    },
+    {
+      "key": "recipient_id",
+      "value": "user456",
+      "type": "default",
+      "enabled": true,
+      "description": "Secondary test user ID"
+    },
+    {
+      "key": "third_user_id",
+      "value": "user789",
+      "type": "default",
+      "enabled": true,
+      "description": "Third test user ID"
+    },
+    {
+      "key": "admin_user_id",
+      "value": "admin_001",
+      "type": "default",
+      "enabled": true,
+      "description": "Admin test user ID"
+    },
+    {
+      "key": "chat_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Current chat ObjectId (auto-populated)"
+    },
+    {
+      "key": "direct_chat_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Direct chat ObjectId (auto-populated)"
+    },
+    {
+      "key": "group_chat_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Group chat ObjectId (auto-populated)"
+    },
+    {
+      "key": "message_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Current message ObjectId (auto-populated)"
+    },
+    {
+      "key": "attachment_id",
+      "value": "",
+      "type": "default",
+      "enabled": true,
+      "description": "Current attachment ObjectId (auto-populated)"
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2024-01-01T00:00:00.000Z",
+  "_postman_exported_using": "Postman/10.20.0"
+}
