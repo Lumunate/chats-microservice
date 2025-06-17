@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: chat-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: chatuser
+      MONGO_INITDB_ROOT_PASSWORD: chatpass
+      MONGO_INITDB_DATABASE: chat_service
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  # chat-service:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: chat-service
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NODE_ENV: development
+  #     DATABASE_URL: mongodb://chatuser:chatpass@mongodb:27017/chat_service?authSource=admin
+  #     AUTH_PROVIDER: mock
+  #     JWT_SECRET: test-jwt-secret
+  #     CORS_ORIGIN: "*"
+  #   depends_on:
+  #     - mongodb
+  #   volumes:
+  #     - ./src:/app/src
+  #   command: ["npm", "run", "dev"]
+
+volumes:
+  mongodb_data:
