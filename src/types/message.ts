@@ -38,4 +38,5 @@ export type MessageWithRelations = IMessage & {
   sender: { id: string; username: string; email: string };
   attachments: IAttachment[];
   readBy: IReadReceipt[];
+  isRead: boolean;
 };

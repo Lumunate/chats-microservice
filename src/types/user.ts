@@ -8,6 +8,7 @@ export const getUsersWithChatsSchema = z.object({
 
 export type ChatWithParticipants = IChat & {
   lastMessageBody: string;
+  unreadCount: number;
   participants: Array<
     IUserChat & {
       user: {

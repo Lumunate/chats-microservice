@@ -4,6 +4,8 @@ import { Chat, IChat } from "../models/chat";
 import { IUserChat, UserChat } from "../models/user-chat";
 import { ChatWithParticipants } from "../types/user";
 import { Message } from "../models/message";
+import { ReadReceipt } from "~/models/read-reciept";
+import { findByChatId } from "./message-repository";
 
 export async function create(
   name: string | null,
@@ -157,8 +159,13 @@ export async function findUserChats(
   const chatsWithParticipants = await Promise.all(
     userChats.map(async (userChat) => {
       const chat = userChat.chatId as unknown as IChat;
-      const allParticipants = await UserChat.find({ chatId: chat._id }).lean();
-      const lastMessage = await Message.findOne({ chatId: chat._id }).lean();
+
+      const [allParticipants, messages] = await Promise.all([
+       UserChat.find({ chatId: chat._id }).lean(),
+       findByChatId(chat._id.toString(), 10, 0),
+    ]);
+
+    const unreadCount = messages?.filter((msg) => !msg.readBy?.some((r) => r.userId === userId))?.length || 0; 
 
       return {
         _id: chat._id,
@@ -167,7 +174,8 @@ export async function findUserChats(
         createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
         lastMessage: chat.lastMessage,
-        lastMessageBody: lastMessage?.content,
+        lastMessageBody: messages[0]?.content,
+        unreadCount,
         metadata: chat.metadata,
         participants: allParticipants.map((p) => ({
           _id: p._id,

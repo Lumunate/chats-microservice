@@ -206,7 +206,7 @@ export class ChatSocket {
         // Broadcast read receipt to chat room
         this.io
           .to(`chat:${chatId}`)
-          .emit("message-read", { messageId, userId });
+          .emit("message-read", { messageId, userId, chatId });
       }
     } catch (error) {
       console.error("Error handling read message:", error);
