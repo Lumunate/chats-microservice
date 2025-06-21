@@ -31,32 +31,6 @@ export function handleErrors(error: unknown, res: Response): Response {
     });
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    // Handle Prisma errors
-    switch (error.code) {
-      case "P2002":
-        return res.status(409).json({
-          error: "Conflict",
-          message: "A record with this identifier already exists.",
-        });
-
-      case "P2025": {
-        const entityName = error.meta?.cause || "Record";
-
-        return res.status(404).json({
-          error: "Not Found",
-          message: `${entityName} not found.`,
-        });
-      }
-
-      default:
-        return res.status(500).json({
-          error: "Database Error",
-          message: "An error occurred while accessing the database.",
-        });
-    }
-  }
-
   if (error instanceof NotFoundError) {
     return res.status(404).json({
       error: "Not found",
