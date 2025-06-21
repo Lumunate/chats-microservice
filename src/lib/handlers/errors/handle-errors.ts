@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { Response } from "express";
 import { ZodError } from "zod";
 
