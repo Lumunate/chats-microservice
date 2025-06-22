@@ -6,8 +6,6 @@ import database from "./lib/mongoose";
 
 import { ChatRoutes, MessageRoutes } from "./routes";
 import handleErrors from "./lib/handlers/errors";
-import dotenv from 'dotenv';
-dotenv.config();
 
 const app = express();
 

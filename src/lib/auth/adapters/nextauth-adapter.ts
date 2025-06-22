@@ -1,6 +1,5 @@
 import axios from "axios";
 import { IAuthAdapter } from "../interfaces";
-import { parseCookies } from "../../utils/parse-cookies";
 
 export class NextAuthAdapter implements IAuthAdapter {
   private readonly NEXTAUTH_URL: string;
@@ -147,11 +146,18 @@ export class NextAuthAdapter implements IAuthAdapter {
     try {
       let token = null;
 
+      // Check Authorization header (JWT)
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
+
       // Check cookies for session token
-      if (req.headers.cookie) {
-        const cookies = parseCookies(req.headers.cookie);
-        token = cookies["next-auth.session-token"] || 
-                cookies["__Secure-next-auth.session-token"];
+      if (!token && req.headers.cookie) {
+        const cookies = this.parseCookies(req.headers.cookie);
+        token =
+          cookies["next-auth.session-token"] ||
+          cookies["__Secure-next-auth.session-token"];
       }
 
       if (!token) {
@@ -171,6 +177,41 @@ export class NextAuthAdapter implements IAuthAdapter {
     } catch (error) {
       console.error(
         "Request validation failed:",
+        error instanceof Error ? error.message : String(error)
+      );
+      return null;
+    }
+  }
+
+  private parseCookies(cookieHeader: string): Record<string, string> {
+    const cookies: Record<string, string> = {};
+    cookieHeader.split(";").forEach((cookie) => {
+      const [name, value] = cookie.trim().split("=");
+      if (name && value) {
+        cookies[name] = decodeURIComponent(value);
+      }
+    });
+    return cookies;
+  }
+
+  // Method to validate user directly with NextAuth app
+  async validateWithNextAuth(token: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.NEXTAUTH_URL}/api/auth/session`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(
+        "NextAuth validation failed:",
         error instanceof Error ? error.message : String(error)
       );
       return null;
