@@ -53,7 +53,10 @@ export class NextAuthAdapter implements IAuthAdapter {
         `${this.NEXTAUTH_URL}/api/auth/session`,
         {
           headers: {
-            Cookie: `next-auth.session-token=${sessionToken}`,
+            Cookie:
+              process.env.NODE_ENV === "development"
+                ? `next-auth.session-token=${sessionToken}`
+                : `__Secure-next-auth.session-token=${sessionToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -114,7 +117,10 @@ export class NextAuthAdapter implements IAuthAdapter {
     try {
       const response = await fetch(`${this.NEXTAUTH_URL}/api/auth/session`, {
         headers: {
-          Cookie: `next-auth.session-token=${sessionToken}`,
+          Cookie:
+            process.env.NODE_ENV === "development"
+              ? `next-auth.session-token=${sessionToken}`
+              : `__Secure-next-auth.session-token=${sessionToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -166,7 +172,7 @@ export class NextAuthAdapter implements IAuthAdapter {
       }
 
       const { userId, isValid } = await this.verifyToken(token);
-      console.log("Token validation result:", userId, isValid);
+      console.log("Token validation result:", token, userId, isValid);
 
       if (!isValid) {
         console.log("Token validation failed");
