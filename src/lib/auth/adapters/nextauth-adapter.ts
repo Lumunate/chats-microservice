@@ -54,7 +54,10 @@ export class NextAuthAdapter implements IAuthAdapter {
         `${this.NEXTAUTH_URL}/api/auth/session`,
         {
           headers: {
-            Cookie: `next-auth.session-token=${sessionToken}`,
+            Cookie:
+              process.env.NODE_ENV === "production"
+                ? `__Secure-next-auth.session-token=${sessionToken}`
+                : `next-auth.session-token=${sessionToken}`,
             "Content-Type": "application/json",
           },
         }
@@ -115,7 +118,10 @@ export class NextAuthAdapter implements IAuthAdapter {
     try {
       const response = await fetch(`${this.NEXTAUTH_URL}/api/auth/session`, {
         headers: {
-          Cookie: `next-auth.session-token=${sessionToken}`,
+          Cookie:
+            process.env.NODE_ENV === "production"
+              ? `__Secure-next-auth.session-token=${sessionToken}`
+              : `next-auth.session-token=${sessionToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -150,8 +156,9 @@ export class NextAuthAdapter implements IAuthAdapter {
       // Check cookies for session token
       if (req.headers.cookie) {
         const cookies = parseCookies(req.headers.cookie);
-        token = cookies["next-auth.session-token"] || 
-                cookies["__Secure-next-auth.session-token"];
+        token =
+          cookies["next-auth.session-token"] ||
+          cookies["__Secure-next-auth.session-token"];
       }
 
       if (!token) {
