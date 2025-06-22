@@ -3,7 +3,7 @@ import { DatabaseConfig } from "../interfaces";
 
 export const getDatabaseConfig = (): DatabaseConfig => {
   const url =
-    process.env.DATABASE_URL || "mongodb://localhost:27017/chat_service";
+    process.env.DATABASE_URL!;
 
   const options: mongoose.ConnectOptions = {
     // Connection options

@@ -2,7 +2,12 @@ import { Server as HTTPServer } from "http";
 import { Server, Socket } from "socket.io";
 
 import { IAuthAdapter } from "../auth";
-import { ChatService, MessageService, UserPresenceService } from "../../services";
+import {
+  ChatService,
+  MessageService,
+  UserPresenceService,
+} from "../../services";
+import { parseCookies } from "../utils/parse-cookies";
 
 export class ChatSocket {
   private io: Server;
@@ -13,10 +18,12 @@ export class ChatSocket {
     server: HTTPServer,
     private authAdapter: IAuthAdapter
   ) {
+    console.log("Initializing ChatSocket...", process.env.CORS_ORIGIN);
     this.io = new Server(server, {
       cors: {
         origin: process.env.CORS_ORIGIN || "*",
         methods: ["GET", "POST"],
+        credentials: true,
       },
     });
 
@@ -27,7 +34,14 @@ export class ChatSocket {
     this.io.use(async (socket, next) => {
       try {
         // Get token from handshake
-        const token = socket.handshake.auth.token as string;
+        const cookies = socket.handshake.headers.cookie
+          ? parseCookies(socket.handshake.headers.cookie)
+          : null;
+
+        const token =
+          cookies?.["next-auth.session-token"] ||
+          cookies?.["__Secure-next-auth.session-token"];
+
         if (!token) {
           return next(new Error("Authentication error"));
         }
