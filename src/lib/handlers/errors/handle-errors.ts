@@ -44,6 +44,8 @@ export function handleErrors(error: unknown, res: Response): Response {
     });
   }
 
+  console.log(error);
+
   return res.status(500).json({
     error: "Internal server error",
     message: error instanceof Error ? error.message : "Unknown error occurred",

@@ -10,6 +10,10 @@ export const sendMessageSchema = z.object({
   metadata: z.record(z.any()).optional(),
 });
 
+export const adminBypass__sendMessageSchema = sendMessageSchema.extend({
+  userId: z.string().min(1, "User ID is required"),
+});
+
 export const getMessagesSchema = z.object({
   chatId: z.string().min(1, "Chat ID is required"),
   page: z.number().int().min(1).default(1),

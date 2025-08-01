@@ -1,15 +1,15 @@
-import {
-  addUserToChatSchema,
-  createDirectChatSchema,
-  createGroupChatSchema,
-  removeUserFromChatSchema,
-  updateChatMetadataSchema,
-} from "../types/chat";
 import { Request, Response } from "express";
 import handleErrors from "../lib/handlers/errors";
 import AuthError, {
-  AuthErrorType,
+    AuthErrorType,
 } from "../lib/handlers/errors/types/AuthError";
+import {
+    addUserToChatSchema,
+    createDirectChatSchema,
+    createGroupChatSchema,
+    removeUserFromChatSchema,
+    updateChatMetadataSchema,
+} from "../types/chat";
 
 import { AuthService, ChatService } from "../services";
 
@@ -39,12 +39,13 @@ export async function createGroupChat(req: Request, res: Response) {
     }
 
     const body = req.body;
-    const { name, participantIds } = createGroupChatSchema.parse(body);
+    const { name, participantIds, metadata } = createGroupChatSchema.parse(body);
 
     const chat = await ChatService.createGroupChat(
       name,
       participantIds,
-      auth.userId
+      auth.userId,
+      metadata
     );
 
     return res.status(201).json({ chat });
