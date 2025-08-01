@@ -1,14 +1,15 @@
-import {
-  addAttachmentsSchema,
-  getMessagesSchema,
-  markAsReadSchema,
-  sendMessageSchema,
-} from "../types/message";
 import { Request, Response } from "express";
 import handleErrors from "../lib/handlers/errors";
 import AuthError, {
-  AuthErrorType,
+    AuthErrorType,
 } from "../lib/handlers/errors/types/AuthError";
+import {
+    addAttachmentsSchema,
+    adminBypass__sendMessageSchema,
+    getMessagesSchema,
+    markAsReadSchema,
+    sendMessageSchema,
+} from "../types/message";
 
 import * as AuthService from "../services/auth-service";
 import * as MessageService from "../services/message-service";
@@ -35,6 +36,28 @@ export async function sendMessage(req: Request, res: Response) {
     return handleErrors(error, res);
   }
 }
+
+export async function adminBypass__sendMessage(req: Request, res: Response) {
+  try {
+    const apiKey = req.header('Api-Key')
+    if(!apiKey || apiKey !== process.env.CHAT_ADMIN_BYPASS_API_KEY) throw new AuthError(AuthErrorType.UNAUTHORIZED);
+
+    const body = req.body;
+    const { chatId, userId, content, metadata } = adminBypass__sendMessageSchema.parse(body);
+
+    const message = await MessageService.sendMessage(
+      chatId,
+      userId,
+      content,
+      metadata
+    );
+
+    return res.status(201).json({ message });
+  } catch (error) {
+    return handleErrors(error, res);
+  }
+}
+
 
 export async function getChatMessages(req: Request, res: Response) {
   try {

@@ -7,7 +7,8 @@ export const createDirectChatSchema = z.object({
 
 export const createGroupChatSchema = z.object({
   name: z.string().min(1, 'Group name is required'),
-  participantIds: z.array(z.string()).min(1, 'At least one participant is required')
+  participantIds: z.array(z.string()).min(1, 'At least one participant is required'),
+  metadata: z.record(z.any()).optional(),
 });
 
 export const addUserToChatSchema = z.object({

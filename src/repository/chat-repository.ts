@@ -3,14 +3,13 @@ import NotFoundError from "../lib/handlers/errors/types/NotFoundError";
 import { Chat, IChat } from "../models/chat";
 import { IUserChat, UserChat } from "../models/user-chat";
 import { ChatWithParticipants } from "../types/user";
-import { Message } from "../models/message";
-import { ReadReceipt } from "~/models/read-reciept";
 import { findByChatId } from "./message-repository";
 
 export async function create(
   name: string | null,
   isGroup: boolean,
-  participantIds: string[]
+  participantIds: string[],
+  metadata?: Object
 ): Promise<IChat> {
   // Start a session for transaction
   const session = await Chat.startSession();
@@ -23,6 +22,7 @@ export async function create(
           {
             name,
             isGroup,
+            metadata,
           },
         ],
         { session, ordered: true }
@@ -165,7 +165,7 @@ export async function findUserChats(
        findByChatId(chat._id.toString(), 10, 0),
     ]);
 
-    const unreadCount = messages?.filter((msg) => !msg.readBy?.some((r) => r.userId === userId))?.length || 0; 
+    const unreadCount = messages?.filter((msg) => !msg.readBy?.some((r) => r.userId === userId))?.length || 0;
 
       return {
         _id: chat._id,

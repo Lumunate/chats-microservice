@@ -1,9 +1,9 @@
-import { IChat } from "../models/chat";
 import AuthError, {
-  AuthErrorType,
+    AuthErrorType,
 } from "../lib/handlers/errors/types/AuthError";
 import NotFoundError from "../lib/handlers/errors/types/NotFoundError";
 import ValidationError from "../lib/handlers/errors/types/ValidationError";
+import { IChat } from "../models/chat";
 import { ChatRepository } from "../repository";
 import { ChatWithParticipants } from "../types/user";
 
@@ -24,7 +24,8 @@ export async function createDirectChat(
 export async function createGroupChat(
   name: string,
   participantIds: string[],
-  adminId: string
+  adminId: string,
+  metadata?: Object
 ): Promise<IChat> {
   // Ensure admin is in the participant list
   if (!participantIds.includes(adminId)) {
@@ -32,7 +33,7 @@ export async function createGroupChat(
   }
 
   // Create the group chat
-  return ChatRepository.create(name, true, participantIds);
+  return ChatRepository.create(name, true, participantIds, metadata);
 }
 
 export async function getUserChats(

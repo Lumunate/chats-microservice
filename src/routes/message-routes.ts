@@ -6,6 +6,10 @@ const router = express.Router();
 // Send a message
 router.post("/", (req, res) => MessageController.sendMessage(req, res));
 
+// Send a message bypassing user authentication
+// uses an API key to protect against abuse
+router.post("/bypass", (req, res) => MessageController.adminBypass__sendMessage(req, res));
+
 // Get messages from a chat
 router.get("/", (req, res) => MessageController.getChatMessages(req, res));
 

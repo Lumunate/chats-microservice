@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IChat extends Document {
   _id: Types.ObjectId;
@@ -8,6 +8,7 @@ export interface IChat extends Document {
   updatedAt: Date;
   lastMessage?: Date;
   metadata?: Record<string, any>;
+  isDeleted: boolean;
 }
 
 const ChatSchema = new Schema<IChat>({
@@ -29,6 +30,10 @@ const ChatSchema = new Schema<IChat>({
   metadata: {
     type: Schema.Types.Mixed,
     required: false
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true,
